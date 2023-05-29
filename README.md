@@ -1,0 +1,13 @@
+# Search Engine Queries Database Generation
+- This project creates a database for queries againest Google search engine 
+- To use the tool:
+    - clone the project by: `git clone <url>`
+    - install the required Python modules: `pip install -r requirements.txt`
+    - add the username and password to the `driver.py` file
+    - run the program: `python driver.py`
+- The database is saved in the file: `SearchResults.txt`
+- The `SearchResults.txt` contains a dataset of 1537 queries
+- The tool uses a preset keywords extracted from a realistic persona [to be published soon]
+- Keywords are categorized to periods of day and type of interest
+- The queries' keywords are drawn at random from the files
+- The tool will also halt at random periods of time to avoid being flaged by the search engine as non-human

@@ -1,11 +1,13 @@
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
 import random
 from selenium.webdriver.common.keys import Keys
 import time
 import datetime
+from os.path import isfile
 #Really cool and awesome webscrapper
 
 options = webdriver.ChromeOptions()
@@ -42,7 +44,7 @@ morning_searches = list(categories_by_time['morning'].keys())
 afternoon_searches = list(categories_by_time['afternoon'].keys())
 evening_searches = list(categories_by_time['evening'].keys())
 
-def get_trait():
+def get_trait() -> None:
     'Get Personality trait file to open'
 
     # Determine the current time of day
@@ -66,7 +68,8 @@ def get_trait():
         trait = random.choice(afternoon_searches)
     elif time_of_day == 'evening':
         trait = random.choice(evening_searches)
-
+        
+        
     return trait
 
     file_to_Open = trait
@@ -74,26 +77,28 @@ def get_trait():
     #Return the name of the trait file to open
     return file_to_Open
 
-def get_query(file_path):
+def get_query(file_path: str) -> str:
     'Returns a random search query from a text file.'
     with open(file_path, 'r') as f:
-        lines = f.readlines()
-        line = random.choice(lines).strip()
-        return line
+    	lines = f.readlines()
+    	line = random.choice(lines).strip()
+    return line
 
-def google_login(username, password):
+def google_login(username: str, password: str) -> None:
     # Navigate to the Google sign-in page
     driver.get('https://accounts.google.com/signin')
 
     # Find the username input field and enter the username
-    username_input = driver.find_element_by_xpath("//input[@type='email']")
+    #username_input = driver.find_element_by_xpath("//input[@type='email']")
+    username_input = driver.find_element(by=By.XPATH, value="//input[@type='email']")
     username_input.send_keys(username)
     username_input.send_keys(Keys.RETURN)
 
     # Wait for the password input field to appear
     time.sleep(3)
     # Find the password input field and enter the password
-    password_input = driver.find_element_by_xpath("//input[@type='password']")
+    password_input = driver.find_element(by=By.XPATH, value="//input[@type='password']")
+                            #find_element(by=By.XPATH, value=xpath) instead password_input = driver.find_element_by_xpath("//input[@type='password']")
     password_input.send_keys(password)
     password_input.send_keys(Keys.RETURN)
 
@@ -102,12 +107,18 @@ def google_login(username, password):
 
 
 results = {} # Initiate empty dictionary to capture results
-def get_searchResults():
-    for search in range(5):
+def get_searchResults() -> None:
+    #for search in range(500):
+    while True:
         'Function to get search results from google and save them into a dictionary'
         #get a random search query from given txt files
         trait = get_trait()
-        query = get_query(trait)
+        fileFound = False
+        while not fileFound:
+        	if isfile(trait):
+        		query = get_query(trait)
+        		fileFound = True
+        	else: trait = get_trait()
         # Specify number of pages on google search, each page contains 10 #links
         n_pages = 2
         links = [] # Store Results in list
@@ -121,22 +132,21 @@ def get_searchResults():
             #Add searches to list
             for h in search:
                 links.append(h.a.text)
-        #time_sleep = random.randint(0, 10)
-        #time.sleep(time_sleep*60)
+        time_sleep = random.randint(0, 10)
+        time.sleep(time_sleep*60)
         results[query] = links
+        # save results to file
+        store_results(query, links)
     driver.close()
-    return results
-    # Store the search results in the dictionary
-    #results[query] = links
 
     print(results)
-def store_results(dictionary):
-    with open("SearchResults.txt", 'w') as f:
-        for key, value in dictionary.items():
-            f.write('%s:%s\n' % (key, value))
 
-def main():
-    #google_login('sloths', 'password')
+def store_results(query, result_lst) -> None:
+    with open("SearchResults.txt", 'a') as f:
+        f.write('%s:%s\n' % (query, result))
+
+def main() -> None:
+    google_login('username@domain.com', 'password')
     results = get_searchResults()
-    store_results(results)
+
 main()
